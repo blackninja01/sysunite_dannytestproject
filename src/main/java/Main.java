@@ -7,18 +7,18 @@ public class Main {
 
     //static final String DB_PATH = "Users\\Danny\\Documents\\Neo4j\\default.graphdb";
 
-    static final String DB_PATH = "Neo4j\\default.graphdb";
+    public static final String DB_PATH = "Neo4j\\default.graphdb";
 
-    Node first;
-    Node second;
-    Relationship relation;
-    GraphDatabaseService graphDataService;
+    public Node first;
+    public Node second;
+    public Relationship relation;
+    public GraphDatabaseService graphDataService;
 
-    Label style = DynamicLabel.label("Style");
-    Label dojo = DynamicLabel.label("Dojo");
-    Label student = DynamicLabel.label("Student");
+    public Label style = DynamicLabel.label("Style");
+    public Label dojo = DynamicLabel.label("Dojo");
+    public Label student = DynamicLabel.label("Student");
 
-    String DenHaag = "Rotterdam";
+    public String DenHaag = "Rotterdam";
 
 
     public enum RelationType implements RelationshipType {
@@ -81,6 +81,8 @@ public class Main {
         try {
             first = graphDataService.createNode();
             first.addLabel(student);
+            first.setProperty("Voornaam", "Bob");
+            first.setProperty("Achternaam", "Bobbinson");
 
 
         }finally {

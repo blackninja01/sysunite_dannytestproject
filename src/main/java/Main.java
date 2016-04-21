@@ -79,6 +79,9 @@ public class Main {
         Transaction transaction = graphDataService.beginTx();
 
         try {
+            first = graphDataService.createNode();
+            first.addLabel(student);
+
 
         }finally {
 

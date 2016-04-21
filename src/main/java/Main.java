@@ -61,7 +61,7 @@ public class Main {
 
             graphDataService.findNodes(dojo);
 
-            relation = first.createRelationshipTo(graphDataService.get(dojo, DenHaag, graphDataService), RelationType.Taught);
+           // relation = first.createRelationshipTo(graphDataService.get(dojo, DenHaag, graphDataService), RelationType.Taught);
             relation.setProperty("relationship-type", "shares");
 
             // succes transaction
@@ -79,7 +79,9 @@ public class Main {
         Transaction transaction = graphDataService.beginTx();
 
         try {
-            
+
+        }finally {
+
         }
     }
 

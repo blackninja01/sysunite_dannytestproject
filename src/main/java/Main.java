@@ -1,8 +1,9 @@
-import org.neo4j.cypher.ExecutionEngine;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.shell.impl.SystemOutput;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -33,10 +34,11 @@ public class Main {
     public Label dojo = DynamicLabel.label("Dojo");
     public Label student = DynamicLabel.label("Student");
 
+    List<Integer> DojoNumbers = new ArrayList<Integer>();
+
     public String DenHaag = "Rotterdam";
 
     Scanner userInput = new Scanner(System.in);
-
 
     public enum RelationType implements RelationshipType {
         Taught, Teaches, Trains,
@@ -54,10 +56,10 @@ public class Main {
         Main main = new Main();
 
         //main.createDatabase();
-        //main.welcomeUser();
-        main.query();
-        main.findStudent();
-        main.showStudentsFromDojo();
+        main.welcomeUser();
+        //main.listAllDojos();
+        //main.findStudent();
+        //main.showStudentsFromDojo();
         /*main.createNewStudent();
         main.readDatabase();
         main.removeDatabase();
@@ -66,33 +68,31 @@ public class Main {
 
     void welcomeUser(){
         System.out.println("Welcome user");
-        System.out.println("Please select a new action:");
-        System.out.println("1. Enter a new Student");
-        System.out.println("2. Shutdown");
-
-        String userInputValue = userInput.nextLine();
-
-        if(userInputValue.equals("1")){
-            createNewStudent();
-        }else if (userInputValue.equals("2")){
-            shutDown();
-        }else {
-            mainMenu();
-        }
+        mainMenu();
     }
 
     void mainMenu(){
         System.out.println("Please select a new action:");
-        System.out.println("1. Enter a new Student");
-        System.out.println("2. Shutdown");
+        System.out.println("1. Enter a new student");
+        System.out.println("2. Show all info for a student");
+        System.out.println("3. Show all students in a Dojo");
+        System.out.println("4. Show all Dojo's");
+        System.out.println("5. Shutdown");
 
-        userInput.next();
+        String MenuChoice = userInput.next();
 
-        if(userInput.toString() == "1"){
+        if(MenuChoice.equals("1")){
             createNewStudent();
-        }else if (userInput.toString() == "2"){
+        }else if (MenuChoice.equals("2")){
+            findStudent();
+        }else if (MenuChoice.equals("3")){
+            showStudentsFromDojo();
+        }else if (MenuChoice.equals("4")){
+            listAllDojos();
+        }else if (MenuChoice.equals("5")){
             shutDown();
-        }
+        }else mainMenu();
+
     }
 
 
@@ -238,7 +238,7 @@ public class Main {
     {
     }
 
-    void query(){
+    void listAllDojos(){
         GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         Transaction ignored = graphService.beginTx();
         try {
@@ -250,6 +250,7 @@ public class Main {
                 PossibleLocations = PossibleLocations.replaceAll("[(){}=]", "");
                 PossibleLocations = PossibleLocations.replaceAll("IDn", "");
                 PossibleLocations = PossibleLocations.replaceAll(",", ".");
+
                 System.out.println(PossibleLocations);
             }
             ignored.success();
@@ -258,38 +259,99 @@ public class Main {
             ignored.finish();
             graphService.shutdown();
         }
+        mainMenu();
     }
 
     void findStudent(){
         GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         Transaction ignored = graphService.beginTx();
 
-        String FirstName = "Super";
-        String LastName = "Man";
+        System.out.println("What is students first name?");
+        String studentFirstName = userInput.next();
 
+        System.out.println("What is students last name?");
+        String studentLastName = userInput.next();
 
         try {
 
-            Result result = graphService.execute( "match (n) where n.Voornaam = '" +FirstName +"' and n.Achternaam = '"+LastName+"' return (n)");
+            Result result = graphService.execute( "match (n) where n.Voornaam = '" +studentFirstName +"' and n.Achternaam = '"+studentLastName+"' return (n)");
             while (result.hasNext()){
-                System.out.println(result.next());
+                String StudentNummer;
+                StudentNummer = result.next().toString();
+                StudentNummer = StudentNummer.replaceAll("n=Node","");
+                StudentNummer = StudentNummer.replaceAll("[{}]","");
+                System.out.println("Student ID:" + StudentNummer);
+            }
+
+            result = graphService.execute( "match (n { Voornaam:'" +studentFirstName +"', Achternaam:'"+studentLastName+"'})-[Trains]->(r) return r.Location");
+            while (result.hasNext()){
+                String TrainingsLocation;
+                TrainingsLocation = result.next().toString();
+                TrainingsLocation = TrainingsLocation.replaceAll("r.Location=", "");
+                TrainingsLocation = TrainingsLocation.replaceAll("[{}]", "");
+                System.out.println(TrainingsLocation);
             }
             ignored.success();
         } finally {
             ignored.finish();
             graphService.shutdown();
         }
+        mainMenu();
     }
 
     void showStudentsFromDojo(){
         GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         Transaction ignored = graphService.beginTx();
 
-        String DojoLocation = "Haarlem";
+        String DojoLocation = "";
 
+        System.out.println("Please select a dojo");
+        System.out.println("1. Amsterdam");
+        System.out.println("2. Amersfoort");
+        System.out.println("3. Alphen aan de Rijn");
+        System.out.println("4. Arnhem");
+        System.out.println("5. Den Haag");
+        System.out.println("6. Haarlem");
+        System.out.println("7. Rotterdam");
+        System.out.println("8. Utrecht");
+        System.out.println("9. Utrecht Lunetten");
+        System.out.println("10. Oegstgeest");
+
+        String DojoSelection = userInput.next();
+
+        if (DojoSelection.equals("1")){
+            DojoLocation = "Amsterdam";
+        } else if (DojoSelection.equals("2")){
+            DojoLocation = "Amersfoort";
+        } else if (DojoSelection.equals("3")){
+            DojoLocation = "Alphen aan de Rijn";
+        } else if (DojoSelection.equals("4")){
+            DojoLocation = "Arnhem";
+        } else if (DojoSelection.equals("5")){
+            DojoLocation = "Den Haag";
+        } else if (DojoSelection.equals("6")){
+            DojoLocation = "Haarlem";
+        } else if (DojoSelection.equals("7")){
+            DojoLocation = "Rotterdam";
+        } else if (DojoSelection.equals("8")){
+            DojoLocation = "Utrecht";
+        } else if (DojoSelection.equals("9")){
+            DojoLocation = "Utrecht Lunetten";
+        } else if (DojoSelection.equals("10")){
+            DojoLocation = "Oegstgeest";
+        }
 
         try {
-            Result result = graphService.execute( "MATCH (Dojo { Location:'"+DojoLocation+"' })<-[:Trains]-(Student) return Student.Voornaam, Student.Achternaam");
+            Result result = graphService.execute( "match (n)-[r: Teaches]-> (Dojo {Location: '" + DojoLocation + "'}) return n.Name");
+            while (result.hasNext()){
+                String SenseiNaam = result.next().toString();
+                SenseiNaam = SenseiNaam.replaceAll("n.Name=", "");
+                SenseiNaam = SenseiNaam.replaceAll("[{}]", "");
+                System.out.println("Sensei: " + SenseiNaam);
+            }
+
+
+            result = graphService.execute( "MATCH (Dojo { Location:'"+DojoLocation+"' })<-[:Trains]-(Student) return Student.Voornaam, Student.Achternaam");
             while (result.hasNext()){
                 String StudentenNaam = result.next().toString();
                 StudentenNaam = StudentenNaam.replaceAll("Student.Voornaam=", "");
@@ -297,11 +359,14 @@ public class Main {
                 StudentenNaam = StudentenNaam.replaceAll("[{},]", "");
                 System.out.println(StudentenNaam);
             }
+
+
             ignored.success();
         } finally {
             ignored.finish();
             graphService.shutdown();
         }
+        mainMenu();
     }
 
     void removeDatabase()
@@ -319,7 +384,6 @@ public class Main {
     }
     void shutDown()
     {
-
         graphDataService.shutdown();
     }
 

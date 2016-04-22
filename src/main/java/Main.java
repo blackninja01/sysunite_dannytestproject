@@ -1,3 +1,4 @@
+import org.neo4j.cypher.ExecutionEngine;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.shell.impl.SystemOutput;
@@ -53,7 +54,10 @@ public class Main {
         Main main = new Main();
 
         //main.createDatabase();
-        main.welcomeUser();
+        //main.welcomeUser();
+        main.query();
+        main.findStudent();
+        main.showStudentsFromDojo();
         /*main.createNewStudent();
         main.readDatabase();
         main.removeDatabase();
@@ -232,6 +236,72 @@ public class Main {
 
     void readDatabase()
     {
+    }
+
+    void query(){
+        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+        Transaction ignored = graphService.beginTx();
+        try {
+
+            Result result = graphService.execute( "match (n:Dojo) return ID(n), n.Location" );
+            while (result.hasNext() ){
+                String PossibleLocations = result.next().toString();
+                PossibleLocations = PossibleLocations.replaceAll("n.Location=", "");
+                PossibleLocations = PossibleLocations.replaceAll("[(){}=]", "");
+                PossibleLocations = PossibleLocations.replaceAll("IDn", "");
+                PossibleLocations = PossibleLocations.replaceAll(",", ".");
+                System.out.println(PossibleLocations);
+            }
+            ignored.success();
+
+        }finally {
+            ignored.finish();
+            graphService.shutdown();
+        }
+    }
+
+    void findStudent(){
+        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+        Transaction ignored = graphService.beginTx();
+
+        String FirstName = "Super";
+        String LastName = "Man";
+
+
+        try {
+
+            Result result = graphService.execute( "match (n) where n.Voornaam = '" +FirstName +"' and n.Achternaam = '"+LastName+"' return (n)");
+            while (result.hasNext()){
+                System.out.println(result.next());
+            }
+            ignored.success();
+        } finally {
+            ignored.finish();
+            graphService.shutdown();
+        }
+    }
+
+    void showStudentsFromDojo(){
+        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+        Transaction ignored = graphService.beginTx();
+
+        String DojoLocation = "Haarlem";
+
+
+        try {
+            Result result = graphService.execute( "MATCH (Dojo { Location:'"+DojoLocation+"' })<-[:Trains]-(Student) return Student.Voornaam, Student.Achternaam");
+            while (result.hasNext()){
+                String StudentenNaam = result.next().toString();
+                StudentenNaam = StudentenNaam.replaceAll("Student.Voornaam=", "");
+                StudentenNaam = StudentenNaam.replaceAll("Student.Achternaam=", "");
+                StudentenNaam = StudentenNaam.replaceAll("[{},]", "");
+                System.out.println(StudentenNaam);
+            }
+            ignored.success();
+        } finally {
+            ignored.finish();
+            graphService.shutdown();
+        }
     }
 
     void removeDatabase()

@@ -6,26 +6,10 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3618f99a-f9fc-492a-95bb-08b1adbd1167" name="Default" comment="End of friday">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/schema/label/lucene/_w.cfs" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/schema/label/lucene/segments_i" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.counts.db.a" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.counts.db.a" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.counts.db.b" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.counts.db.b" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.nodestore.db" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.nodestore.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.nodestore.db.id" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.nodestore.db.id" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.propertystore.db" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.propertystore.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.propertystore.db.id" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.propertystore.db.id" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.relationshipstore.db" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.relationshipstore.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.relationshipstore.db.id" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.relationshipstore.db.id" />
+    <list default="true" id="3618f99a-f9fc-492a-95bb-08b1adbd1167" name="Default" comment="End of Saturday">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.transaction.db.0" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/neostore.transaction.db.0" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/schema/label/lucene/segments.gen" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/schema/label/lucene/segments.gen" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Main$NodeType.class" afterPath="$PROJECT_DIR$/target/classes/Main$NodeType.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Main$RelationType.class" afterPath="$PROJECT_DIR$/target/classes/Main$RelationType.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/Main.class" afterPath="$PROJECT_DIR$/target/classes/Main.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Neo4j/default.graphdb/messages.log" afterPath="$PROJECT_DIR$/Neo4j/default.graphdb/messages.log" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/Main.java" afterPath="$PROJECT_DIR$/src/main/java/Main.java" />
     </list>
     <ignored path="sysunite_dannytestproject.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -582,7 +566,14 @@
       <option name="project" value="LOCAL" />
       <updated>1461360509697</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="End of Saturday">
+      <created>1461451263810</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1461451263810</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -630,7 +621,8 @@
     <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
     <MESSAGE value="First Commit" />
     <MESSAGE value="End of friday" />
-    <option name="LAST_COMMIT_MESSAGE" value="End of friday" />
+    <MESSAGE value="End of Saturday" />
+    <option name="LAST_COMMIT_MESSAGE" value="End of Saturday" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

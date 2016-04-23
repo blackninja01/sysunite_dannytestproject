@@ -1,160 +1,159 @@
-import org.apache.commons.lang3.StringUtils;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Scanner;
+import java.lang.Thread;
 
-public class Main {
+public class Main{
+    static final String DB_PATH = "Neo4j\\default.graphdb";
+    static final int SERVERPORT = 23;
 
-    //static final String DB_PATH = "Users\\Danny\\Documents\\Neo4j\\default.graphdb";
+    Node first;
+    Node second;
+    GraphDatabaseService graphDataService;
 
-    public static final String DB_PATH = "Neo4j\\default.graphdb";
-
-    public static final int DOJODENHAAGNUM = 5;
-    public static final int DOJOROTTERDAMNUM = 6;
-    public static final int DOJOAMSTERDAMNUM = 7;
-    public static final int DOJOHAARLEMNUM = 8;
-    public static final int DOJOALPHENAANDERIJNNUM = 11;
-    public static final int DOJOAMERSFOORTNUM = 12;
-    public static final int DOJOARNHEMNUM = 13;
-    public static final int DOJOUTRECHTNUM = 14;
-    public static final int DOJOUTRECHTLUNETTENNUM = 15;
-    public static final int DOJOOEGSTGEESTNUM = 19;
+    Label student = DynamicLabel.label("Student");
+    boolean notified = false;
 
 
-
-    public Node first;
-    public Node second;
-    public Relationship relation;
-    public GraphDatabaseService graphDataService;
-
-    public Label style = DynamicLabel.label("Style");
-    public Label dojo = DynamicLabel.label("Dojo");
-    public Label student = DynamicLabel.label("Student");
-
-    List<Integer> DojoNumbers = new ArrayList<Integer>();
-
-    public String DenHaag = "Rotterdam";
-
-    Scanner userInput = new Scanner(System.in);
-
-    public enum RelationType implements RelationshipType {
+    enum RelationType implements RelationshipType {
         Taught, Teaches, Trains,
     }
 
-    public enum NodeType implements Label{
-        Person, Course, Style
-    }
-
-
-
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
+    public static void main(String[] args) throws Exception {
         Main main = new Main();
 
-        //main.createDatabase();
-        main.welcomeUser();
-        //main.listAllDojos();
-        //main.findStudent();
-        //main.showStudentsFromDojo();
-        /*main.createNewStudent();
-        main.readDatabase();
-        main.removeDatabase();
-        main.shutDown();*/
+        while (true) {
+            main.serverHandeling();
+        }
     }
 
-    void welcomeUser(){
-        System.out.println("Welcome user");
-        mainMenu();
-    }
-
-    void mainMenu(){
-        System.out.println("Please select a new action:");
-        System.out.println("1. Enter a new student");
-        System.out.println("2. Show all info for a student");
-        System.out.println("3. Show all students in a Dojo");
-        System.out.println("4. Show all Dojo's");
-        System.out.println("5. Shutdown");
-
-        String MenuChoice = userInput.next();
-
-        if(MenuChoice.equals("1")){
-            createNewStudent();
-        }else if (MenuChoice.equals("2")){
-            findStudent();
-        }else if (MenuChoice.equals("3")){
-            showStudentsFromDojo();
-        }else if (MenuChoice.equals("4")){
-            listAllDojos();
-        }else if (MenuChoice.equals("5")){
-            shutDown();
-        }else mainMenu();
-
-    }
-
-
-    void createDatabase()
-    {
-        //GraphDatabaseService
-        graphDataService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-
-
-        //Begin Transaction
-        Transaction transaction = graphDataService.beginTx();
+    void serverHandeling(){
         try {
-            first = graphDataService.createNode();
-            first.addLabel(style);
-            first.setProperty("Style", "Krav Maga");
+            ServerSocket serverSocket = new ServerSocket(SERVERPORT);
+            notified = false;
+            System.out.println("Server started!\r\n" +
+                    "Servers IP-address: " + InetAddress.getLocalHost().getHostAddress() + "\r\n" +
+                    "Servers Listening Port: " + SERVERPORT + "\r\n");
 
-            second = graphDataService.createNode();
-            second.addLabel(style);
-            second.setProperty("Style", "Jujitsu");
+            Socket connectionSocket = serverSocket.accept(); //Make a connection
 
-            //graphDataService.findNodes(dojo);
 
-           // relation = first.createRelationshipTo(graphDataService.get(dojo, DenHaag, graphDataService), RelationType.Taught);
-           // relation.setProperty("relationship-type", "shares");
 
-            // succes transaction
-            transaction.success();
+                BufferedReader messagesFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())); //Read what is incomming
+                PrintWriter outgoingMessage = new PrintWriter(connectionSocket.getOutputStream(), true); // prepare for sending
+                boolean MainMenuIsNeeded = true;
 
+
+                while (true) {
+                    if (MainMenuIsNeeded) {
+                        outgoingMessage.println("Please select a new action:\r\n" +
+                                "1. Enter a new student\r\n" +
+                                "2. Show all info for a student\r\n" +
+                                "3. Show all students in a Dojo\r\n" +
+                                "4. Show all Dojo's\r\n" +
+                                "5. Shutdown");
+                    }
+                    MainMenuIsNeeded = true;
+
+                    String clientCommand = messagesFromClient.readLine();
+                    String connectwith = connectionSocket.getInetAddress().toString();
+                    connectwith = connectwith.replaceAll("/", "");
+                    System.out.println("Connected with: " + connectwith);
+                    System.out.println("Received: " + clientCommand);
+
+
+                    String MenuChoice = clientCommand;
+
+                    if (MenuChoice.equals("1")) {
+                        try {
+                            createNewStudentforClient(serverSocket, connectionSocket, outgoingMessage, messagesFromClient);
+                        } catch (Exception ee) {
+                        }
+                        MainMenuIsNeeded = false;
+                    } else if (MenuChoice.equals("2")) {
+                        try {
+                            findStudentforClient(serverSocket, connectionSocket, outgoingMessage, messagesFromClient);
+                        } catch (Exception ee) {
+                        }
+                        MainMenuIsNeeded = false;
+                    } else if (MenuChoice.equals("3")) {
+                        try {
+                            showStudentsFromDojoforClient(serverSocket, connectionSocket, outgoingMessage, messagesFromClient);
+                        } catch (Exception ee) {
+                        }
+                        MainMenuIsNeeded = false;
+                    } else if (MenuChoice.equals("4")) {
+                        try {
+                            listAllDojosforClient(serverSocket, connectionSocket, outgoingMessage);
+                        } catch (Exception ee) {
+                        }
+                        MainMenuIsNeeded = false;
+                    } else if (MenuChoice.equals("5")) {
+                        shutDown();
+                    }
+                }
+
+        } catch (Exception eeo) {
+            if (!(notified)){
+                System.out.println("We lost a connection");
+                notified = true;
+            }
         }
-        finally {
-            transaction.finish();
-        }
-
-        mainMenu();
-
     }
 
+    void listAllDojosforClient(ServerSocket serverSocket, Socket connectionSocket, PrintWriter outgoingMessage) {
+        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+        Transaction ignored = graphService.beginTx();
+        try {
+            Result result = graphService.execute( "match (n:Dojo) return ID(n), n.Location" );
+            while (result.hasNext() ){
+                String PossibleLocations = result.next().toString();
+                PossibleLocations = PossibleLocations.replaceAll("n.Location=", "");
+                PossibleLocations = PossibleLocations.replaceAll("[(){}=]", "");
+                PossibleLocations = PossibleLocations.replaceAll("IDn", "");
+                PossibleLocations = PossibleLocations.replaceAll(",", ".");
+                outgoingMessage.println(PossibleLocations);
+            }
+            ignored.success();
 
-    void createNewStudent(){
+        }finally {
+            ignored.finish();
+            graphService.shutdown();
+        }
+    }
+    void createNewStudentforClient(ServerSocket serverSocket, Socket connectionSocket, PrintWriter outgoingMessage, BufferedReader messagesFromClient) throws Exception{
 
-        graphDataService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+
+        //graphDataService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         int studentTrainingLocation = 0;
 
-        System.out.println("What is new students first name?");
-        String studentFirstName = userInput.next();
+        outgoingMessage.println("What is new students first name?");
+        String studentFirstName = messagesFromClient.readLine();
 
-        System.out.println("What is new students last name?");
-        String studentLastName = userInput.next();
+        outgoingMessage.println("What is new students last name?");
+        String studentLastName = messagesFromClient.readLine();
 
-        System.out.println("Where does the student train?");
-        System.out.println("1. Amsterdam");
-        System.out.println("2. Amersfoort");
-        System.out.println("3. Alphen aan de Rijn");
-        System.out.println("4. Arnhem");
-        System.out.println("5. Den Haag");
-        System.out.println("6. Haarlem");
-        System.out.println("7. Rotterdam");
-        System.out.println("8. Utrecht");
-        System.out.println("9. Utrecht Lunetten");
-        System.out.println("10. Oegstgeest");
-        System.out.println("11. Unlimited Contract");
-        String studentTrainingLoc = userInput.next();
+        outgoingMessage.println("Where does the student train? \r\n" +
+                                "1. Amsterdam \r\n" +
+                                "2. Amersfoort \r\n" +
+                                "3. Alphen aan de Rijn \r\n" +
+                                "4. Arnhem \r\n" +
+                                "5. Den Haag \r\n" +
+                                "6. Haarlem \r\n" +
+                                "7. Rotterdam \r\n" +
+                                "8. Utrecht \r\n" +
+                                "9. Utrecht Lunetten \r\n" +
+                                "10. Oegstgeest \r\n" +
+                                "11. Unlimited Contract");
+
+        String studentTrainingLoc = messagesFromClient.readLine();
+
         if (studentTrainingLoc.equals("1")){
             studentTrainingLocation = 7;
         } else if (studentTrainingLoc.equals("2")){
@@ -177,15 +176,15 @@ public class Main {
             studentTrainingLocation = 19;
         }
 
-        Transaction transaction = graphDataService.beginTx();
+        Transaction transaction = graphService.beginTx();
         if (!(studentTrainingLoc.equals("11"))) {
             try {
-                first = graphDataService.createNode();
+                first = graphService.createNode();
                 first.addLabel(student);
                 first.setProperty("Voornaam", studentFirstName);
                 first.setProperty("Achternaam", studentLastName);
 
-                second = graphDataService.getNodeById(studentTrainingLocation);
+                second = graphService.getNodeById(studentTrainingLocation);
 
                 first.createRelationshipTo(second, RelationType.Trains);
 
@@ -194,33 +193,34 @@ public class Main {
 
             } finally {
                 transaction.finish();
+                graphService.shutdown();
             }
         } else{
             try {
-                first = graphDataService.createNode();
+                first = graphService.createNode();
                 first.addLabel(student);
                 first.setProperty("Voornaam", studentFirstName);
                 first.setProperty("Achternaam", studentLastName);
 
-                second = graphDataService.getNodeById(5);
+                second = graphService.getNodeById(5);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(6);
+                second = graphService.getNodeById(6);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(7);
+                second = graphService.getNodeById(7);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(8);
+                second = graphService.getNodeById(8);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(11);
+                second = graphService.getNodeById(11);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(12);
+                second = graphService.getNodeById(12);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(13);
+                second = graphService.getNodeById(13);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(14);
+                second = graphService.getNodeById(14);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(15);
+                second = graphService.getNodeById(15);
                 first.createRelationshipTo(second, RelationType.Trains);
-                second = graphDataService.getNodeById(19);
+                second = graphService.getNodeById(19);
                 first.createRelationshipTo(second, RelationType.Trains);
 
                 transaction.success();
@@ -228,49 +228,21 @@ public class Main {
 
             } finally {
                 transaction.finish();
+                graphService.shutdown();
             }
         }
-        mainMenu();
     }
 
+    void findStudentforClient(ServerSocket serverSocket, Socket connectionSocket, PrintWriter outgoingMessage, BufferedReader messagesFromClient) throws Exception{
 
-    void readDatabase()
-    {
-    }
-
-    void listAllDojos(){
-        GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-        Transaction ignored = graphService.beginTx();
-        try {
-
-            Result result = graphService.execute( "match (n:Dojo) return ID(n), n.Location" );
-            while (result.hasNext() ){
-                String PossibleLocations = result.next().toString();
-                PossibleLocations = PossibleLocations.replaceAll("n.Location=", "");
-                PossibleLocations = PossibleLocations.replaceAll("[(){}=]", "");
-                PossibleLocations = PossibleLocations.replaceAll("IDn", "");
-                PossibleLocations = PossibleLocations.replaceAll(",", ".");
-
-                System.out.println(PossibleLocations);
-            }
-            ignored.success();
-
-        }finally {
-            ignored.finish();
-            graphService.shutdown();
-        }
-        mainMenu();
-    }
-
-    void findStudent(){
         GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         Transaction ignored = graphService.beginTx();
 
-        System.out.println("What is students first name?");
-        String studentFirstName = userInput.next();
+        outgoingMessage.println("What is students first name?");
+        String studentFirstName =  messagesFromClient.readLine();
 
-        System.out.println("What is students last name?");
-        String studentLastName = userInput.next();
+        outgoingMessage.println("What is students last name?");
+        String studentLastName =  messagesFromClient.readLine();
 
         try {
 
@@ -280,7 +252,7 @@ public class Main {
                 StudentNummer = result.next().toString();
                 StudentNummer = StudentNummer.replaceAll("n=Node","");
                 StudentNummer = StudentNummer.replaceAll("[{}]","");
-                System.out.println("Student ID:" + StudentNummer);
+                outgoingMessage.println("Student ID:" + StudentNummer);
             }
 
             result = graphService.execute( "match (n { Voornaam:'" +studentFirstName +"', Achternaam:'"+studentLastName+"'})-[Trains]->(r) return r.Location");
@@ -289,35 +261,34 @@ public class Main {
                 TrainingsLocation = result.next().toString();
                 TrainingsLocation = TrainingsLocation.replaceAll("r.Location=", "");
                 TrainingsLocation = TrainingsLocation.replaceAll("[{}]", "");
-                System.out.println(TrainingsLocation);
+                outgoingMessage.println(TrainingsLocation);
             }
             ignored.success();
         } finally {
             ignored.finish();
             graphService.shutdown();
         }
-        mainMenu();
     }
 
-    void showStudentsFromDojo(){
+    void showStudentsFromDojoforClient(ServerSocket serverSocket, Socket connectionSocket, PrintWriter outgoingMessage, BufferedReader messagesFromClient) throws Exception{
         GraphDatabaseService graphService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
         Transaction ignored = graphService.beginTx();
 
         String DojoLocation = "";
 
-        System.out.println("Please select a dojo");
-        System.out.println("1. Amsterdam");
-        System.out.println("2. Amersfoort");
-        System.out.println("3. Alphen aan de Rijn");
-        System.out.println("4. Arnhem");
-        System.out.println("5. Den Haag");
-        System.out.println("6. Haarlem");
-        System.out.println("7. Rotterdam");
-        System.out.println("8. Utrecht");
-        System.out.println("9. Utrecht Lunetten");
-        System.out.println("10. Oegstgeest");
+        outgoingMessage.println("Please select a dojo \r\n" +
+                                "1. Amsterdam \r\n" +
+                                "2. Amersfoort \r\n" +
+                                "3. Alphen aan de Rijn \r\n" +
+                                "4. Arnhem \r\n" +
+                                "5. Den Haag \r\n" +
+                                "6. Haarlem \r\n" +
+                                "7. Rotterdam \r\n" +
+                                "8. Utrecht \r\n" +
+                                "9. Utrecht Lunetten \r\n" +
+                                "10. Oegstgeest \r\n");
 
-        String DojoSelection = userInput.next();
+        String DojoSelection = messagesFromClient.readLine();
 
         if (DojoSelection.equals("1")){
             DojoLocation = "Amsterdam";
@@ -347,7 +318,7 @@ public class Main {
                 String SenseiNaam = result.next().toString();
                 SenseiNaam = SenseiNaam.replaceAll("n.Name=", "");
                 SenseiNaam = SenseiNaam.replaceAll("[{}]", "");
-                System.out.println("Sensei: " + SenseiNaam);
+                outgoingMessage.println("Sensei: " + SenseiNaam);
             }
 
 
@@ -357,7 +328,7 @@ public class Main {
                 StudentenNaam = StudentenNaam.replaceAll("Student.Voornaam=", "");
                 StudentenNaam = StudentenNaam.replaceAll("Student.Achternaam=", "");
                 StudentenNaam = StudentenNaam.replaceAll("[{},]", "");
-                System.out.println(StudentenNaam);
+                outgoingMessage.println(StudentenNaam);
             }
 
 
@@ -366,22 +337,8 @@ public class Main {
             ignored.finish();
             graphService.shutdown();
         }
-        mainMenu();
     }
 
-    void removeDatabase()
-    {
-        Transaction transaction = graphDataService.beginTx();
-
-        try {
-            first.delete();
-            second.delete();
-        }
-        finally {
-            transaction.finish();
-        }
-
-    }
     void shutDown()
     {
         graphDataService.shutdown();
